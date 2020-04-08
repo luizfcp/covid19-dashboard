@@ -1,6 +1,6 @@
 # Covid-19 dashboard
 
-Este [dashboard do Covid-19](https://luizfcp.shinyapps.io/covid19/) fornece uma visão geral da pandemiaprovocada pelo novo coronavírus (COVID-19) no Brasil e no Mundo. Este dashboard foi feito com a linguagem de programação R (version 3.6.3) utilizando o pacote Shiny.
+Este [dashboard do Covid-19](https://luizfcp.shinyapps.io/covid19/) fornece uma visão geral da pandemia provocada pelo novo coronavírus (COVID-19) no Brasil e no Mundo. Este dashboard foi feito com a linguagem de programação R (version 3.6.3) utilizando o pacote Shiny.
 
 
 #### Brasil
