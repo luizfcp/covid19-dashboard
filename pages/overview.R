@@ -32,7 +32,7 @@ overview <- tabItem(
         "<br>", "<br>",
         "<b> Aba Brasil </b>", "<br>",
         "Fonte: <a href='https://covid.saude.gov.br/'>Painel coronavírus no Brasil pelo Ministério da Saúde</a>", "<br>",
-        "Última atualização: ", "17:30", dmy("08/04/2020") %>% format("%d de %B de %Y"), 
+        "Última atualização: ", "17:30", dmy("09/04/2020") %>% format("%d de %B de %Y"), 
         "<br>", "<br>",
         "<b> Aba Mundo </b>", "<br>",
         "Pacote:", desc_corona$Package, "<br>",
