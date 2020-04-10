@@ -294,7 +294,7 @@ server = function(session ,input, output) {
     # Grafico de linha - 4 maiores
     output$graph_total_mundo_maiores <- 
         renderPlotly({
-            mundo_maiores <- coronavirus %>% group_by(Country.Region) %>% summarise(cases = sum(cases)) %>% arrange(-cases) %>% head(4)
+            mundo_maiores <- coronavirus %>% group_by(Country.Region) %>% filter(type=="confirmed") %>% summarise(cases = sum(cases)) %>% arrange(-cases) %>% head(4)
             
             mundo_graph_maiores <- coronavirus %>% 
                 filter(Country.Region==mundo_maiores$Country.Region) %>% 
