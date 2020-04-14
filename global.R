@@ -51,6 +51,10 @@ data_brasil <- coronavirus %>% as_tibble() %>% filter(Country.Region=="Brazil")
 data_brasil_estados <- read_csv2("data/brasil/COVID19.csv") %>% 
   `colnames<-`(c("regiao", "estado", "data", "casosNovos", "casosAcumulados", "obitosNovos", "obitosAcumulados"))
 
+if (!is.Date(data_brasil_estados$data[[1]])) {
+  data_brasil_estados %>% mutate(data = data %>% dmy())
+}
+
 cod_ibge <- read_csv2("data/cod_ibge.csv") %>% select(CD_GEOCUF, SG_ESTADO) %>% `colnames<-`(c("cod", "estado"))
 ibge_estado <- read_csv2("data/cod_ibge.csv") %>% select(NM_ESTADO, SG_ESTADO) %>% `colnames<-`(c("Estado", "Sigla"))
 

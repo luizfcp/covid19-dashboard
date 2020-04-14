@@ -116,8 +116,7 @@ server = function(session ,input, output) {
                 group_by(data, type) %>%
                 summarise(casos = sum(value)) %>%
                 ungroup() %>%
-                mutate(type = ifelse(type=="casosNovos", "Confirmados", "Óbitos"),
-                       data = data %>% dmy()) %>% 
+                mutate(type = ifelse(type=="casosNovos", "Confirmados", "Óbitos")) %>% 
                 filter(data > "2020-02-25")
 
             graph_total_br <-
@@ -186,8 +185,7 @@ server = function(session ,input, output) {
                           obitosAcumulados = sum(obitosAcumulados)) %>% 
                 select(data, casosAcumulados, obitosAcumulados) %>%
                 gather(type, casos, -data) %>%
-                mutate(type = ifelse(type=="casosAcumulados", "Confirmados", "Óbitos"),
-                       data = data %>% dmy()) %>% 
+                mutate(type = ifelse(type=="casosAcumulados", "Confirmados", "Óbitos")) %>% 
                 filter(data > "2020-02-25")
             
             graph_total_br_acumulado <-
