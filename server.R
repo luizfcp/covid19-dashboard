@@ -124,8 +124,8 @@ server = function(session ,input, output) {
                 ggplot(aes(x = data, y = casos, color = type)) +
                 geom_point() +
                 geom_line() +
-                scale_x_date(date_breaks = "1 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod$casos), 100), expand = c(0, 20)) +
+                scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod$casos), 200), expand = c(0, 20)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia",
                 theme_minimal() +
@@ -194,8 +194,8 @@ server = function(session ,input, output) {
                 # geom_area() +
                 geom_point() +
                 geom_line() +
-                scale_x_date(date_breaks = "1 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 1000), expand = c(0, 100)) +
+                scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 2000), expand = c(0, 100)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia",
                 theme_minimal() +

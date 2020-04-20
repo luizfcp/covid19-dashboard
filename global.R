@@ -52,7 +52,7 @@ data_brasil_estados <- read_csv2("data/brasil/COVID19.csv") %>%
   `colnames<-`(c("regiao", "estado", "data", "casosNovos", "casosAcumulados", "obitosNovos", "obitosAcumulados"))
 
 if (!is.Date(data_brasil_estados$data[[1]])) {
-  data_brasil_estados %>% mutate(data = data %>% dmy())
+  data_brasil_estados %<>% mutate(data = data %>% dmy())
 }
 
 cod_ibge <- read_csv2("data/cod_ibge.csv") %>% select(CD_GEOCUF, SG_ESTADO) %>% `colnames<-`(c("cod", "estado"))
