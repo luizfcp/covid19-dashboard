@@ -79,7 +79,7 @@ server = function(session ,input, output) {
                     geom_col() +
                     geom_label() +
                     scale_fill_manual(values = c(co_cor, nordeste_cor, norte_cor, sudeste_cor, sul_cor)) +
-                    scale_y_continuous(breaks = seq(0, max(data_brasil_regiao$`casos total`), 1000), expand = c(0, 500)) +
+                    scale_y_continuous(breaks = seq(0, max(data_brasil_regiao$`casos total`), 2000), expand = c(0, 800)) +
                     theme_minimal() +
                     theme(legend.position = "none",
                           plot.title = element_text(size=15, hjust = 0.5)) + #face="bold", 
@@ -125,7 +125,7 @@ server = function(session ,input, output) {
                 geom_point() +
                 geom_line() +
                 scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod$casos), 200), expand = c(0, 20)) +
+                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod$casos), 500), expand = c(0, 100)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia",
                 theme_minimal() +
@@ -195,7 +195,7 @@ server = function(session ,input, output) {
                 geom_point() +
                 geom_line() +
                 scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 2000), expand = c(0, 100)) +
+                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 5000), expand = c(0, 500)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia",
                 theme_minimal() +
@@ -264,7 +264,7 @@ server = function(session ,input, output) {
                 geom_point() +
                 geom_line() +
                 scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_mundo_graph_total_mundo$cases), 5000), expand = c(0, 5000)) +
+                scale_y_continuous(breaks = seq(0, max(data_mundo_graph_total_mundo$cases), 5000), expand = c(0, 2000)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia", 
                 theme_minimal() +
