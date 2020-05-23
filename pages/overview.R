@@ -28,11 +28,11 @@ overview <- tabItem(
     footer = span( 
       HTML(
         "<b> Dados </b>", 
-        # "Os dados utilizados nas análises para este dashboard se encontram em <a href='https://covid.saude.gov.br/'>Painel coronavírus no Brasil pelo Ministério da Saúde</a> e <a href='https://github.com/Covid19R/coronavirus'>coronavirus R package</a>.",
+        "Os dados utilizados nas análises para este dashboard se encontram em <a href='https://covid.saude.gov.br/'>Painel coronavírus no Brasil pelo Ministério da Saúde</a> e <a href='https://github.com/Covid19R/coronavirus'>coronavirus R package</a>.",
         "<br>", "<br>",
-        "<b> Aba Brasil </b>", "<br>",
+        "<b> Abas Brasil e Estados - RJ e SP </b>", "<br>",
         "Fonte: <a href='https://covid.saude.gov.br/'>Painel coronavírus no Brasil pelo Ministério da Saúde</a>", "<br>",
-        "Última atualização: ", list.files("data/brasil") %>% tail(1) %>% str_sub(start = 9, end = 16) %>% ymd() %>% format("%d de %B de %Y"), 
+        "Última atualização: ", data_dados %>% format("%d de %B de %Y"),
         "<br>", "<br>",
         "<b> Aba Mundo </b>", "<br>",
         "Pacote:", desc_corona$Package, "<br>",

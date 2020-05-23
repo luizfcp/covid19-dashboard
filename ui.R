@@ -20,6 +20,11 @@ dashboardPagePlus(
                 icon = icon("globe-americas")
             ),
             menuItem(
+                "Estados - RJ e SP",
+                tabName = "rj_sp_page",
+                icon = icon("flag")
+            ),
+            menuItem(
                 "Mundo",
                 tabName = "mundo_page",
                 icon = icon("globe")
@@ -38,6 +43,7 @@ dashboardPagePlus(
         # Abas
         tabItems(
             brasil,
+            rj_sp,
             mundo,
             overview
         )

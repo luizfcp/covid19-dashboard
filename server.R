@@ -9,28 +9,33 @@ server = function(session ,input, output) {
     output$confirmado_box_br <- renderValueBox({
         valueBox(br_confirmados %>% as.integer() %>% formatC(big.mark = "."), "Casos confirmados", icon = icon("plus-square"), color = "blue")
     })
-    # output$recuperado_box_br <- renderValueBox({
-    #     valueBox(br_recuperados %>% as.integer() %>% formatC(big.mark = "."), "Recuperados", icon = icon("heartbeat"), color = "green")
-    # })
+    output$recuperado_box_br <- renderValueBox({
+        valueBox(br_recuperados %>% as.integer() %>% formatC(big.mark = "."), "Recuperados", icon = icon("heartbeat"), color = "green")
+    })
     output$obito_box_br <- renderValueBox({
         valueBox(br_obitos %>% as.integer() %>% formatC(big.mark = "."), "Óbitos", icon = icon("skull"), color = "orange")
     })
     output$letalidade_box_br <- renderValueBox({
         valueBox(br_letalidade, "Letalidade", color = "red")
     })
+    output$hoje_box_br <- renderValueBox({
+        valueBox(
+            format(data_dados, "%d de %B de %Y"),
+            paste0("Confirmados: ", br_confirmados_hoje, "; Óbitos: ", br_obitos_hoje, "; Recuperados: ", br_recuperados_hoje, ";"), 
+            color = "purple")
+    })
     
     # Mapa
     output$map_br <- 
         renderLeaflet({
-            br <- readOGR(dsn = "mapa_br_uf", use_iconv = TRUE, layer = "BRUFE250GC_SIR", encoding = "UTF-8")
+            br <- readOGR(dsn = "mapas/mapa_br_uf", use_iconv = TRUE, layer = "BRUFE250GC_SIR", encoding = "UTF-8")
             
             br@data %<>% 
                 inner_join(
                     data_brasil_estados %>% 
-                        select(estado, casosNovos, obitosNovos) %>% 
-                        group_by(estado) %>% 
-                        summarise("casos_total" = sum(casosNovos),
-                                  "obitos_total" = sum(obitosNovos)) %>% 
+                        filter(data == data_dados) %>%
+                        select(estado, casosAcumulados, obitosAcumulados) %>%
+                        `colnames<-`(c("estado", "casos_total", "obitos_total")) %>% 
                         mutate(letalidade = percent(obitos_total/casos_total, accuracy = 0.01)) %>% 
                         inner_join(cod_ibge, by = "estado") %>% 
                         mutate(cod = as.factor(cod)),
@@ -66,7 +71,9 @@ server = function(session ,input, output) {
     data_brasil_regiao <- 
         data_brasil_estados %>% 
         group_by(regiao) %>% 
-        summarise("casos total" = sum(casosNovos)) %>% 
+        filter(data == data_dados) %>% 
+        summarise("casos total" = sum(casosAcumulados)) %>% 
+        ungroup() %>% 
         mutate(proporcao = (`casos total`/sum(`casos total`)) %>% percent(accuracy = 0.01))
     
     output$graph_total_regiao <- 
@@ -79,7 +86,7 @@ server = function(session ,input, output) {
                     geom_col() +
                     geom_label() +
                     scale_fill_manual(values = c(co_cor, nordeste_cor, norte_cor, sudeste_cor, sul_cor)) +
-                    scale_y_continuous(breaks = seq(0, max(data_brasil_regiao$`casos total`), 2000), expand = c(0, 800)) +
+                    scale_y_continuous(breaks = seq(0, max(data_brasil_regiao$`casos total`), 20000), expand = c(0, 500)) +
                     theme_minimal() +
                     theme(legend.position = "none",
                           plot.title = element_text(size=15, hjust = 0.5)) + #face="bold", 
@@ -107,63 +114,65 @@ server = function(session ,input, output) {
             
         })
     
-    # Grafico de linha
-    output$graph_total_br <- 
-        renderPlotly({
-            data_brasil_estados_mod <-
-                data_brasil_estados %>% select(data, casosNovos, obitosNovos) %>%
-                gather(type, value, -data) %>%
-                group_by(data, type) %>%
-                summarise(casos = sum(value)) %>%
-                ungroup() %>%
-                mutate(type = ifelse(type=="casosNovos", "Confirmados", "Óbitos")) %>% 
-                filter(data > "2020-02-25")
-
-            graph_total_br <-
-                data_brasil_estados_mod %>%
-                ggplot(aes(x = data, y = casos, color = type)) +
-                geom_point() +
-                geom_line() +
-                scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod$casos), 500), expand = c(0, 100)) +
-                scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
-                labs(x = "", y = "") + #title = "Total de casos por dia",
-                theme_minimal() +
-                theme(axis.text.x = element_text(angle = 45, hjust = 1),
-                      # legend.position = "none",
-                      legend.text = element_text(face="bold", size = 10),
-                      legend.title = element_blank(),
-                      plot.title = element_text(size=15, face="bold", hjust = 0.5))
-            
-            # graph_total_br <- 
-            #     data_brasil %>% select(date, cases, type) %>% 
-            #     mutate(type = ifelse(type=="confirmed", "Confirmados", ifelse(type=="death", "Óbitos", "Recuperados"))) %>% 
-            #     filter(date>"2020-02-25") %>% 
-            #     ggplot(aes(x = date, y = cases, color = type)) + 
-            #     # geom_area() +
-            #     geom_point() +
-            #     geom_line() +
-            #     scale_x_date(date_breaks = "1 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-            #     scale_y_continuous(breaks = seq(0, max(data_brasil$cases), 100), expand = c(0, 10)) +
-            #     scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
-            #     labs(x = "", y = "") + #title = "Total de casos por dia", 
-            #     theme_minimal() +
-            #     theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-            #           # legend.position = "none",
-            #           legend.text = element_text(face="bold", size = 10),
-            #           legend.title = element_blank(),
-            #           plot.title = element_text(size=15, face="bold", hjust = 0.5))
-
-            ggplotly(graph_total_br) %>% layout(legend = list(x = 0.3, y = -0.11, orientation = 'h'))
-        })
+    # # Grafico de linha
+    # output$graph_total_br <- 
+    #     renderPlotly({
+    #         data_brasil_estados_mod <-
+    #             data_brasil_estados %>% select(data, casosNovos, obitosNovos) %>%
+    #             gather(type, value, -data) %>%
+    #             group_by(data, type) %>%
+    #             summarise(casos = sum(value)) %>%
+    #             ungroup() %>%
+    #             mutate(type = ifelse(type=="casosNovos", "Confirmados", "Óbitos"),
+    #                    data = data %>% dmy()) %>% 
+    #             filter(data > "2020-02-25")
+    # 
+    #         graph_total_br <-
+    #             data_brasil_estados_mod %>%
+    #             ggplot(aes(x = data, y = casos, color = type)) +
+    #             geom_point() +
+    #             geom_line() +
+    #             scale_x_date(date_breaks = "1 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+    #             scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod$casos), 100), expand = c(0, 20)) +
+    #             scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
+    #             labs(x = "", y = "") + #title = "Total de casos por dia",
+    #             theme_minimal() +
+    #             theme(axis.text.x = element_text(angle = 45, hjust = 1),
+    #                   # legend.position = "none",
+    #                   legend.text = element_text(face="bold", size = 10),
+    #                   legend.title = element_blank(),
+    #                   plot.title = element_text(size=15, face="bold", hjust = 0.5))
+    #         
+    #         # graph_total_br <- 
+    #         #     data_brasil %>% select(date, cases, type) %>% 
+    #         #     mutate(type = ifelse(type=="confirmed", "Confirmados", ifelse(type=="death", "Óbitos", "Recuperados"))) %>% 
+    #         #     filter(date>"2020-02-25") %>% 
+    #         #     ggplot(aes(x = date, y = cases, color = type)) + 
+    #         #     # geom_area() +
+    #         #     geom_point() +
+    #         #     geom_line() +
+    #         #     scale_x_date(date_breaks = "1 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+    #         #     scale_y_continuous(breaks = seq(0, max(data_brasil$cases), 100), expand = c(0, 10)) +
+    #         #     scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
+    #         #     labs(x = "", y = "") + #title = "Total de casos por dia", 
+    #         #     theme_minimal() +
+    #         #     theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+    #         #           # legend.position = "none",
+    #         #           legend.text = element_text(face="bold", size = 10),
+    #         #           legend.title = element_blank(),
+    #         #           plot.title = element_text(size=15, face="bold", hjust = 0.5))
+    # 
+    #         ggplotly(graph_total_br) %>% layout(legend = list(x = 0.3, y = -0.11, orientation = 'h'))
+    #     })
 
     # Tabela
     output$dt <- 
         renderDT({
             tabela <- data_brasil_estados %>% 
-                group_by(estado) %>% 
-                summarise("Confirmados" = sum(casosNovos),
-                          "Óbitos" = sum(obitosNovos)) %>% 
+                group_by(estado) %>%
+                filter(data == data_dados) %>% 
+                select(estado, casosAcumulados, obitosAcumulados) %>% 
+                `colnames<-`(c("estado", "Confirmados", "Óbitos")) %>% 
                 mutate(Letalidade = percent(`Óbitos`/Confirmados, accuracy = 0.01))
             
             ibge_estado %>% 
@@ -179,14 +188,20 @@ server = function(session ,input, output) {
     output$graph_total_br_acumulado <- 
         renderPlotly({
             data_brasil_estados_mod_acumulado <-
-                data_brasil_estados %>% 
+                data_brasil %>% 
+                select(data, casosAcumulados, obitosAcumulados, RecuperadosAcumulados) %>%
                 group_by(data) %>% 
-                summarise(casosAcumulados = sum(casosAcumulados),
-                          obitosAcumulados = sum(obitosAcumulados)) %>% 
-                select(data, casosAcumulados, obitosAcumulados) %>%
                 gather(type, casos, -data) %>%
-                mutate(type = ifelse(type=="casosAcumulados", "Confirmados", "Óbitos")) %>% 
-                filter(data > "2020-02-25")
+                mutate(
+                    type = case_when(
+                        type == "casosAcumulados" ~ "Confirmados",
+                        type == "obitosAcumulados" ~ "Óbitos",
+                        type == "RecuperadosAcumulados" ~ "Recuperados",
+                        TRUE ~ type
+                    ),
+                    casos = ifelse(is.na(casos), 0, casos)
+                ) %>% 
+                ungroup()
             
             graph_total_br_acumulado <-
                 data_brasil_estados_mod_acumulado %>%
@@ -195,7 +210,7 @@ server = function(session ,input, output) {
                 geom_point() +
                 geom_line() +
                 scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 5000), expand = c(0, 500)) +
+                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 20000), expand = c(0, 100)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia",
                 theme_minimal() +
@@ -205,7 +220,133 @@ server = function(session ,input, output) {
                       legend.title = element_blank(),
                       plot.title = element_text(size=15, face="bold", hjust = 0.5))
             
-            ggplotly(graph_total_br_acumulado) %>% layout(legend = list(x = 0.4, y = -0.11, orientation = 'h'))
+            ggplotly(graph_total_br_acumulado) %>% layout(legend = list(x = 0.3, y = -0.11, orientation = 'h'))
+        })
+
+    # Rio de Janeiro ----------------------------------------------------------
+    
+    # valuebox
+    output$confirmado_box_rj <- renderValueBox({
+        valueBox(rj_confirmados %>% as.integer() %>% formatC(big.mark = "."), "Casos confirmados", icon = icon("plus-square"), color = "blue")
+    })
+    # output$recuperado_box_rj <- renderValueBox({
+    #     valueBox(br_recuperados %>% as.integer() %>% formatC(big.mark = "."), "Recuperados", icon = icon("heartbeat"), color = "green")
+    # })
+    output$obito_box_rj <- renderValueBox({
+        valueBox(rj_obitos %>% as.integer() %>% formatC(big.mark = "."), "Óbitos", icon = icon("skull"), color = "orange")
+    })
+    output$letalidade_box_rj <- renderValueBox({
+        valueBox(rj_letalidade, "Letalidade", color = "red")
+    })
+    output$hoje_box_rj <- renderValueBox({
+        valueBox(
+            format(data_dados, "%d de %B de %Y"),
+            paste0("Confirmados: ", rj_confirmados_hoje, "; Óbitos: ", rj_obitos_hoje, ";"), 
+            color = "purple")
+    })
+    
+    # Mapa - RJ
+    output$map_rj <- 
+        renderLeaflet({
+            rj <- readOGR(dsn = "mapas/mapa_rj_mun", use_iconv = TRUE, layer = "33MUE250GC_SIR", encoding = "UTF-8")
+            
+            rj@data %<>% 
+                mutate(CD_GEOCMU = CD_GEOCMU %>% str_sub(end = 6)) %>%
+                inner_join(
+                    data_rj %>% 
+                        filter(data == data_dados) %>% 
+                        select(codmun, casosAcumulados, obitosAcumulados) %>% 
+                        `colnames<-`(c("CD_GEOCMU", "casos_total", "obitos_total")) %>% 
+                        mutate(letalidade = percent(obitos_total/casos_total, accuracy = 0.01)) %>% 
+                        mutate(CD_GEOCMU = as.factor(CD_GEOCMU))
+                )
+            
+            pal = colorBin(palette = c("#66b5ff", "#0e72ff", "#272ad6", "#3c0091"), domain = rj@data$casos_total)
+            labels = paste("<br> Município:", rj@data$NM_MUN, "</br>",
+                           "<br> Casos confirmados:", rj@data$casos_total, "</br>",
+                           "<br> Óbitos:", rj@data$obitos_total, "</br>",
+                           "<br> Letalidade:" , rj@data$letalidade,"</br>")
+            
+            leaflet() %>% 
+                # addProviderTiles(providers$Esri.WorldImagery) %>% 
+                addPolygons(data = rj,
+                            weight = 1,
+                            smoothFactor = 0.5,
+                            color = "white",
+                            fillOpacity = 0.8,
+                            fillColor = pal(rj@data$casos_total),
+                            highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = FALSE),
+                            label = lapply(labels, HTML)
+                ) %>% 
+                addLegend(pal = pal,
+                          values = rj@data$casos_total,
+                          opacity = 0.5,
+                          position = "bottomright",
+                          title = "Casos confirmados") %>% 
+                addProviderTiles("Esri.WorldGrayCanvas", options = providerTileOptions(minZoom=5, maxZoom=8))
+        })
+
+    # São Paulo ---------------------------------------------------------------
+
+    # valuebox
+    output$confirmado_box_sp <- renderValueBox({
+        valueBox(sp_confirmados %>% as.integer() %>% formatC(big.mark = "."), "Casos confirmados", icon = icon("plus-square"), color = "blue")
+    })
+    # output$recuperado_box_sp <- renderValueBox({
+    #     valueBox(br_recuperados %>% as.integer() %>% formatC(big.mark = "."), "Recuperados", icon = icon("heartbeat"), color = "green")
+    # })
+    output$obito_box_sp <- renderValueBox({
+        valueBox(sp_obitos %>% as.integer() %>% formatC(big.mark = "."), "Óbitos", icon = icon("skull"), color = "orange")
+    })
+    output$letalidade_box_sp <- renderValueBox({
+        valueBox(sp_letalidade, "Letalidade", color = "red")
+    })
+    output$hoje_box_sp <- renderValueBox({
+        valueBox(
+            format(data_dados, "%d de %B de %Y"),
+            paste0("Confirmados: ", sp_confirmados_hoje, "; Óbitos: ", sp_obitos_hoje, ";"), 
+            color = "purple")
+    })
+    
+    # Mapa - RJ
+    output$map_sp <- 
+        renderLeaflet({
+            sp <- readOGR(dsn = "mapas/mapa_sp_mun", use_iconv = TRUE, layer = "35MUE250GC_SIR", encoding = "UTF-8")
+            
+            sp@data %<>% 
+                mutate(CD_GEOCMU = CD_GEOCMU %>% str_sub(end = 6)) %>%
+                inner_join(
+                    data_sp %>% 
+                        filter(data == data_dados) %>% 
+                        select(codmun, casosAcumulados, obitosAcumulados) %>% 
+                        `colnames<-`(c("CD_GEOCMU", "casos_total", "obitos_total")) %>% 
+                        mutate(letalidade = percent(obitos_total/casos_total, accuracy = 0.01)) %>% 
+                        mutate(CD_GEOCMU = as.factor(CD_GEOCMU))
+                )
+            
+            pal = colorBin(palette = c("#66b5ff", "#0e72ff", "#272ad6", "#3c0091"), domain = sp@data$casos_total)
+            labels = paste("<br> Município:", sp@data$NM_MUN, "</br>",
+                           "<br> Casos confirmados:", sp@data$casos_total, "</br>",
+                           "<br> Óbitos:", sp@data$obitos_total, "</br>",
+                           "<br> Letalidade:" , sp@data$letalidade,"</br>")
+            
+            leaflet() %>% 
+                # addProviderTiles(providers$Esri.WorldImagery) %>% 
+                addPolygons(data = sp,
+                            weight = 1,
+                            smoothFactor = 0.5,
+                            color = "white",
+                            fillOpacity = 0.8,
+                            fillColor = pal(sp@data$casos_total),
+                            highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = FALSE),
+                            label = lapply(labels, HTML)
+                ) %>% 
+                addLegend(pal = pal,
+                          values = sp@data$casos_total,
+                          opacity = 0.5,
+                          position = "bottomright",
+                          title = "Casos confirmados") %>% 
+                addProviderTiles("Esri.WorldGrayCanvas", options = providerTileOptions(minZoom=5, maxZoom=8))
         })
     
     # Mundo -------------------------------------------------------------------
@@ -264,7 +405,7 @@ server = function(session ,input, output) {
                 geom_point() +
                 geom_line() +
                 scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_mundo_graph_total_mundo$cases), 5000), expand = c(0, 2000)) +
+                scale_y_continuous(breaks = seq(0, max(data_mundo_graph_total_mundo$cases), 5000), expand = c(0, 5000)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia", 
                 theme_minimal() +
@@ -292,7 +433,7 @@ server = function(session ,input, output) {
     # Grafico de linha - 4 maiores
     output$graph_total_mundo_maiores <- 
         renderPlotly({
-            mundo_maiores <- coronavirus %>% group_by(Country.Region) %>% filter(type=="confirmed") %>% summarise(cases = sum(cases)) %>% arrange(-cases) %>% head(4)
+            mundo_maiores <- coronavirus %>% group_by(Country.Region) %>% summarise(cases = sum(cases)) %>% arrange(-cases) %>% head(4)
             
             mundo_graph_maiores <- coronavirus %>% 
                 filter(Country.Region==mundo_maiores$Country.Region) %>% 
