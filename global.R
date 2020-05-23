@@ -67,12 +67,13 @@ data_brasil <- data %>%
 
 # Dados - Estados e Região
 data_brasil_estados <- data %>% 
+  filter(municipio=="") %>% 
   select(1, 2, 8, 11, 12) %>% 
   `colnames<-`(c("regiao", "estado", "data", "casosAcumulados", "obitosAcumulados")) %>% 
   filter(regiao!="Brasil") %>% 
   group_by(regiao, estado, data) %>% 
-  summarise(casosAcumulados = sum(as.numeric(casosAcumulados)),
-            obitosAcumulados = sum(as.numeric(obitosAcumulados))) %>% 
+  arrange(-casosAcumulados) %>% 
+  top_n(1) %>% 
   ungroup()
 
 # Dados - RJ
