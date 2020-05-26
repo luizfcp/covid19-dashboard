@@ -49,26 +49,26 @@ source("pages/overview.R", encoding = "UTF-8")
 
 # Brasil - Dados ----------------------------------------------------------
 
-# data_brasil <- coronavirus %>% as_tibble() %>% filter(Country.Region=="Brazil")
-# data <- read_xlsx("data/brasil/COVID19.xlsx") %>% suppressWarnings() %>% suppressMessages()
 data <- read.csv2("data/brasil/COVID19.csv", encoding = "UTF-8") %>% as_tibble()
 
+# Condição para transformar a coluna "Data" no tipo "date"
 if (!is.Date(data$data[[1]])) {
   data %<>% mutate(data = data %>% ymd())
 }
 
+# Variável para ver o último dia da atualização dos dados
 data_dados <- data$data %>% max()
 
 # Dados - Brasil
 data_brasil <- data %>% 
-  select(1, 8, 11, 12:14) %>% 
+  select(1, 8, 11, 13, 15:16) %>% 
   `colnames<-`(c("regiao", "data", "casosAcumulados", "obitosAcumulados", "RecuperadosAcumulados", "emAcompanhamentoNovos")) %>% 
   filter(regiao=="Brasil") 
 
 # Dados - Estados e Região
 data_brasil_estados <- data %>% 
   filter(municipio=="") %>% 
-  select(1, 2, 8, 11, 12) %>% 
+  select(1, 2, 8, 11, 13) %>% 
   `colnames<-`(c("regiao", "estado", "data", "casosAcumulados", "obitosAcumulados")) %>% 
   filter(regiao!="Brasil") %>% 
   group_by(regiao, estado, data) %>% 
@@ -79,7 +79,7 @@ data_brasil_estados <- data %>%
 # Dados - RJ
 data_rj <- data %>% 
   filter(estado=="RJ", municipio!="") %>% 
-  select(2, 3, 5, 8, 11, 12) %>% 
+  select(2, 3, 5, 8, 11, 13) %>% 
   `colnames<-`(c("estado", "municipio", "codmun", "data", "casosAcumulados", "obitosAcumulados"))
 
 data_rj_box <- data_rj %>% 
@@ -91,7 +91,7 @@ data_rj_box <- data_rj %>%
 # Dados - SP
 data_sp <- data %>% 
   filter(estado=="SP", municipio!="") %>% 
-  select(2, 3, 5, 8, 11, 12) %>% 
+  select(2, 3, 5, 8, 11, 13) %>% 
   `colnames<-`(c("estado", "municipio", "codmun", "data", "casosAcumulados", "obitosAcumulados"))
 
 data_sp_box <- data_sp %>% 
