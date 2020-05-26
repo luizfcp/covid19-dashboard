@@ -308,7 +308,7 @@ server = function(session ,input, output) {
             color = "purple")
     })
     
-    # Mapa - RJ
+    # Mapa - SP
     output$map_sp <- 
         renderLeaflet({
             sp <- readOGR(dsn = "mapas/mapa_sp_mun", use_iconv = TRUE, layer = "35MUE250GC_SIR", encoding = "UTF-8")
@@ -430,36 +430,36 @@ server = function(session ,input, output) {
                 )
         })
     
-    # Grafico de linha - 4 maiores
-    output$graph_total_mundo_maiores <- 
-        renderPlotly({
-            mundo_maiores <- coronavirus %>% group_by(Country.Region) %>% summarise(cases = sum(cases)) %>% arrange(-cases) %>% head(4)
-            
-            mundo_graph_maiores <- coronavirus %>% 
-                filter(Country.Region==mundo_maiores$Country.Region) %>% 
-                group_by(Country.Region, date, type) %>% 
-                summarise(cases = sum(cases)) %>% 
-                mutate(type = ifelse(type=="confirmed", "Confirmados", ifelse(type=="death", "Óbitos", "Recuperados")))
-            
-            graph_total_mundo_maiores <- 
-                mundo_graph_maiores %>% 
-                ggplot(aes(x = date, y = cases, color = type)) +
-                geom_point() +
-                geom_line() +
-                scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(mundo_graph_maiores$cases), 2000), expand = c(0, 500)) +
-                scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
-                labs(x = "", y = "") + 
-                theme_bw() +
-                theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-                      # legend.position = "none",
-                      legend.text = element_text(face="bold", size = 10),
-                      legend.title = element_blank(),
-                      plot.title = element_text(size=15, face="bold", hjust = 0.5)) +
-                facet_wrap(~ Country.Region)
-            
-            ggplotly(graph_total_mundo_maiores) %>% layout(legend = list(x = 0.4, y = -0.05, orientation = 'h'))
-        })
+    # # Grafico de linha - 4 maiores
+    # output$graph_total_mundo_maiores <- 
+    #     renderPlotly({
+    #         mundo_maiores <- coronavirus %>% group_by(Country.Region) %>% summarise(cases = sum(cases)) %>% arrange(-cases) %>% head(4)
+    #         
+    #         mundo_graph_maiores <- coronavirus %>% 
+    #             filter(Country.Region==mundo_maiores$Country.Region) %>% 
+    #             group_by(Country.Region, date, type) %>% 
+    #             summarise(cases = sum(cases)) %>% 
+    #             mutate(type = ifelse(type=="confirmed", "Confirmados", ifelse(type=="death", "Óbitos", "Recuperados")))
+    #         
+    #         graph_total_mundo_maiores <- 
+    #             mundo_graph_maiores %>% 
+    #             ggplot(aes(x = date, y = cases, color = type)) +
+    #             geom_point() +
+    #             geom_line() +
+    #             scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+    #             scale_y_continuous(breaks = seq(0, max(mundo_graph_maiores$cases), 2000), expand = c(0, 500)) +
+    #             scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
+    #             labs(x = "", y = "") + 
+    #             theme_bw() +
+    #             theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+    #                   # legend.position = "none",
+    #                   legend.text = element_text(face="bold", size = 10),
+    #                   legend.title = element_blank(),
+    #                   plot.title = element_text(size=15, face="bold", hjust = 0.5)) +
+    #             facet_wrap(~ Country.Region)
+    #         
+    #         ggplotly(graph_total_mundo_maiores) %>% layout(legend = list(x = 0.4, y = -0.05, orientation = 'h'))
+    #     })
 
     # User --------------------------------------------------------------------
     
