@@ -3,6 +3,30 @@
 
 server = function(session ,input, output) {
     
+    # # pop-up aviso
+    # aviso <- modalDialog(
+    #     title = "AVISO",
+    #     div(style = "text-align:justify; padding-right:20px;",
+    #         tags$ol(
+    #             "Devido as mudanças na forma de divulgação dos dados por parte do Ministério da Saúde do Brasil, a aba 'Brasil' deste painel está em manutenção por tempo indeterminado.",
+    #             HTML("<br>"),
+    #             "Desculpe o transtorno.",
+    #             HTML("<br>"),
+    #             "Data da última atualização dos dados da aba 'Brasil': 04/06/2020"
+    #             
+    #         )
+    #     ),
+    #     easyClose = T, 
+    #     footer = tagList(
+    #         bsButton("btn_ok", HTML("&nbsp;&nbsp; OK"), icon("check"))
+    #     )
+    # )
+    # 
+    # # abrir popup ao iniciar o shiny
+    # showModal(aviso)
+    # # fechar modal ao clicar em OK
+    # observeEvent(input$btn_ok, removeModal())
+    
     # Brasil ------------------------------------------------------------------
 
     # valuebox
@@ -86,7 +110,7 @@ server = function(session ,input, output) {
                     geom_col() +
                     geom_label() +
                     scale_fill_manual(values = c(co_cor, nordeste_cor, norte_cor, sudeste_cor, sul_cor)) +
-                    scale_y_continuous(breaks = seq(0, max(data_brasil_regiao$`casos total`), 20000), expand = c(0, 500)) +
+                    scale_y_continuous(breaks = seq(0, max(data_brasil_regiao$`casos total`), 30000), expand = c(0, 500)) +
                     theme_minimal() +
                     theme(legend.position = "none",
                           plot.title = element_text(size=15, hjust = 0.5)) + #face="bold", 
@@ -114,56 +138,74 @@ server = function(session ,input, output) {
             
         })
     
-    # # Grafico de linha
-    # output$graph_total_br <- 
-    #     renderPlotly({
-    #         data_brasil_estados_mod <-
-    #             data_brasil_estados %>% select(data, casosNovos, obitosNovos) %>%
-    #             gather(type, value, -data) %>%
-    #             group_by(data, type) %>%
-    #             summarise(casos = sum(value)) %>%
-    #             ungroup() %>%
-    #             mutate(type = ifelse(type=="casosNovos", "Confirmados", "Óbitos"),
-    #                    data = data %>% dmy()) %>% 
-    #             filter(data > "2020-02-25")
-    # 
-    #         graph_total_br <-
-    #             data_brasil_estados_mod %>%
-    #             ggplot(aes(x = data, y = casos, color = type)) +
-    #             geom_point() +
-    #             geom_line() +
-    #             scale_x_date(date_breaks = "1 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-    #             scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod$casos), 100), expand = c(0, 20)) +
-    #             scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
-    #             labs(x = "", y = "") + #title = "Total de casos por dia",
-    #             theme_minimal() +
-    #             theme(axis.text.x = element_text(angle = 45, hjust = 1),
-    #                   # legend.position = "none",
-    #                   legend.text = element_text(face="bold", size = 10),
-    #                   legend.title = element_blank(),
-    #                   plot.title = element_text(size=15, face="bold", hjust = 0.5))
-    #         
-    #         # graph_total_br <- 
-    #         #     data_brasil %>% select(date, cases, type) %>% 
-    #         #     mutate(type = ifelse(type=="confirmed", "Confirmados", ifelse(type=="death", "Óbitos", "Recuperados"))) %>% 
-    #         #     filter(date>"2020-02-25") %>% 
-    #         #     ggplot(aes(x = date, y = cases, color = type)) + 
-    #         #     # geom_area() +
-    #         #     geom_point() +
-    #         #     geom_line() +
-    #         #     scale_x_date(date_breaks = "1 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-    #         #     scale_y_continuous(breaks = seq(0, max(data_brasil$cases), 100), expand = c(0, 10)) +
-    #         #     scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
-    #         #     labs(x = "", y = "") + #title = "Total de casos por dia", 
-    #         #     theme_minimal() +
-    #         #     theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-    #         #           # legend.position = "none",
-    #         #           legend.text = element_text(face="bold", size = 10),
-    #         #           legend.title = element_blank(),
-    #         #           plot.title = element_text(size=15, face="bold", hjust = 0.5))
-    # 
-    #         ggplotly(graph_total_br) %>% layout(legend = list(x = 0.3, y = -0.11, orientation = 'h'))
-    #     })
+    # Grafico de linha
+    output$graph_total_br <-
+        renderPlotly({
+            
+            graph_total_br <-
+                    data_brasil_novos_mod %>%
+                    ggplot(aes(x = data, y = casos, color = tipo)) +
+                    geom_point() +
+                    geom_line() +
+                    scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                    scale_y_continuous(breaks = seq(0, max(data_brasil_novos_mod$casos), 5000), expand = c(0, 1000)) +
+                    scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
+                    labs(x = "", y = "") + #title = "Total de casos por dia",
+                    theme_minimal() +
+                    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                          # legend.position = "none",
+                          legend.text = element_text(face="bold", size = 10),
+                          legend.title = element_blank(),
+                          plot.title = element_text(size=15, face="bold", hjust = 0.5))
+                ggplotly(graph_total_br) %>% layout(legend = list(x = 0.3, y = -0.11, orientation = 'h'))
+            
+        })
+    
+    # Grafico de barras por tipo - Confirmados/Obitos
+    output$graph_diario_tipo_br <- 
+        renderPlotly({
+           
+            if (input$graph_diario_tipo_br_toggle) {
+                
+                graph_diario_tipo_br <-
+                    data_brasil_novos_mod %>%
+                    filter(tipo == "Óbitos") %>% 
+                    ggplot(aes(x = data, y = casos, fill = tipo)) +
+                    geom_bar(stat = "identity", position = "stack") +
+                    scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                    scale_y_continuous(breaks = seq(0, max(data_brasil_novos_mod$casos), 100), expand = c(0, 50)) +
+                    scale_fill_manual(values = c(obito_cor)) +
+                    labs(x = "", y = "", title = "Casos novos por dia: Óbitos") +
+                    theme_minimal() +
+                    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                          legend.text = element_text(size = 10),
+                          legend.title = element_blank(),
+                          plot.title = element_text(size=15, face="bold", hjust = 0.5))
+                ggplotly(graph_diario_tipo_br) %>% layout(legend = list(x = 0.5, y = -0.11, orientation = 'h')) %>% 
+                    onRender("function(el,x){el.on('plotly_legendclick', function(){ return false; })}")
+                
+            } else {
+            
+                graph_diario_tipo_br <-
+                    data_brasil_novos_mod %>%
+                    filter(tipo == "Confirmados") %>% 
+                    ggplot(aes(x = data, y = casos, fill = tipo)) +
+                    geom_bar(stat = "identity", position = "stack") +
+                    scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                    scale_y_continuous(breaks = seq(0, max(data_brasil_novos_mod$casos), 5000), expand = c(0, 1000)) +
+                    scale_fill_manual(values = c(confirmado_cor)) +
+                    labs(x = "", y = "", title = "Casos novos por dia: Confimados") +
+                    theme_minimal() +
+                    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                          legend.text = element_text(face="bold", size = 10),
+                          legend.title = element_blank(),
+                          plot.title = element_text(size=15, face="bold", hjust = 0.5))
+                ggplotly(graph_diario_tipo_br) %>% layout(legend = list(x = 0.5, y = -0.11, orientation = 'h')) %>% 
+                    onRender("function(el,x){el.on('plotly_legendclick', function(){ return false; })}")
+                
+            }
+                
+        })
 
     # Tabela
     output$dt <- 
@@ -209,8 +251,8 @@ server = function(session ,input, output) {
                 # geom_area() +
                 geom_point() +
                 geom_line() +
-                scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 20000), expand = c(0, 100)) +
+                scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 100000), expand = c(0, 12000)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia",
                 theme_minimal() +
@@ -404,8 +446,8 @@ server = function(session ,input, output) {
                 # geom_area() +
                 geom_point() +
                 geom_line() +
-                scale_x_date(date_breaks = "2 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_mundo_graph_total_mundo$cases), 5000), expand = c(0, 5000)) +
+                scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                scale_y_continuous(breaks = seq(0, max(data_mundo_graph_total_mundo$cases), 10000), expand = c(0, 5000)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia", 
                 theme_minimal() +

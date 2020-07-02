@@ -37,7 +37,7 @@ overview <- tabItem(
         "<b> Aba Mundo </b>", "<br>",
         "Pacote:", desc_corona$Package, "<br>",
         "Descrição:", desc_corona$Title, "<br>",
-        "Data:", packageDate("coronavirus") %>% format("%d de %B de %Y"), "<br>",
+        # "Data:", packageDate("coronavirus") %>% format("%d de %B de %Y"), "<br>",
         "Versão:", desc_corona$Version, "<br>",
         "Autor:", desc_corona$Author %>% str_sub(end = 12), "<br>",
         "Link: <a href='https://covid19r.github.io/coronavirus/'>coronavirus R package</a>"

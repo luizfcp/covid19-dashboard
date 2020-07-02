@@ -27,8 +27,17 @@ brasil <- tabItem(
     )
   ,
   fluidRow(
-    # box(width = 8, plotlyOutput("graph_total_br") %>% withSpinner(color=spin_cor), title = "Total de casos por dia"),
-    box(width = 8, plotlyOutput("graph_total_br_acumulado") %>% withSpinner(color=spin_cor), title = "Total de casos por dia"),
+    box(width = 6, plotlyOutput("graph_total_br") %>% withSpinner(color=spin_cor), title = "Casos novos por dia"),
+    box(width = 6, 
+        prettyToggle(inputId = "graph_diario_tipo_br_toggle",
+                     label_on = "Clique aqui para visualizar o gráfico: Casos Confirmados", label_off = "Clique aqui para visualizar o gráfico: Óbitos Confirmados",
+                     outline = TRUE, plain = TRUE, animation = "jelly",
+                     icon_on = icon("plus-square"), icon_off = icon("skull")),
+        plotlyOutput("graph_diario_tipo_br") %>% withSpinner(color=spin_cor)
+    )
+  ),
+  fluidRow(
+    box(width = 8, plotlyOutput("graph_total_br_acumulado") %>% withSpinner(color=spin_cor), title = "Casos acumulados por dia"),
     box(width = 4, DTOutput("dt") %>% withSpinner(color=spin_cor))
   )
   # ,

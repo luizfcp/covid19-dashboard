@@ -17,11 +17,14 @@ library(shinydashboard)
 library(shinydashboardPlus)
 library(shinyWidgets)
 library(shinycssloaders)
+library(shinyBS)
 library(DT)
 library(tidyr)
 library(lubridate)
 library(stringr)
 library(readr)
+
+options(scipen = 99999999)
 
 # Cores -------------------------------------------------------------------
 
@@ -40,20 +43,19 @@ nordeste_cor = "#ff7e0e"
 # spin load
 spin_cor = "#3c8dbc"
 
-# Abas --------------------------------------------------------------------
-
-source("pages/brasil.R", encoding = "UTF-8")
-source("pages/rj_sp.R", encoding = "UTF-8")
-source("pages/mundo.R", encoding = "UTF-8")
-source("pages/overview.R", encoding = "UTF-8")
-
 # Brasil - Dados ----------------------------------------------------------
 
 data <- read.csv2("data/brasil/COVID19.csv", encoding = "UTF-8") %>% as_tibble()
 
 # Condição para transformar a coluna "Data" no tipo "date"
 if (!is.Date(data$data[[1]])) {
-  data %<>% mutate(data = data %>% ymd())
+  
+  ifelse(
+    data$data[[1]] == "25/02/2020" | data$data[[1]] == "26/02/2020",
+    data %<>% mutate(data = data %>% dmy()),
+    data %<>% mutate(data = data %>% ymd())
+  )
+  
 }
 
 # Variável para ver o último dia da atualização dos dados
@@ -75,6 +77,17 @@ data_brasil_estados <- data %>%
   arrange(-casosAcumulados) %>% 
   top_n(1) %>% 
   ungroup()
+
+# Dados - Brasil - Casos novos
+data_brasil_novos_mod <-
+  data %>%
+  select(1, data, casosNovos, obitosNovos) %>%
+  `colnames<-`(c("regiao", "data", "casosNovos", "obitosNovos")) %>% 
+  filter(regiao == "Brasil") %>% 
+  select(-regiao) %>% 
+  gather(tipo, casos, -data) %>%
+  ungroup() %>%
+  mutate(tipo = ifelse(tipo=="casosNovos", "Confirmados", "Óbitos"))
 
 # Dados - RJ
 data_rj <- data %>% 
@@ -107,7 +120,7 @@ ibge_estado <- read_csv2("data/cod_ibge.csv") %>% select(NM_ESTADO, SG_ESTADO) %
 br_confirmados <- data_brasil$casosAcumulados %>% last() %>% as.integer()
 br_obitos <- data_brasil$obitosAcumulados %>% last() %>% as.integer()
 br_letalidade <- percent(br_obitos/br_confirmados, accuracy = 0.01)
-br_recuperados <- data_brasil$RecuperadosAcumulados %>% last()
+br_recuperados <- data_brasil$RecuperadosAcumulados %>% na.omit() %>% last()
 
 br_confirmados_hoje <- ( br_confirmados-(data_brasil$casosAcumulados[nrow(data_brasil)-1] %>% as.integer()) ) %>% formatC(big.mark = ".")
 br_obitos_hoje <- ( br_obitos-(data_brasil$obitosAcumulados[nrow(data_brasil)-1] %>% as.integer()) ) %>% formatC(big.mark = ".")
@@ -144,14 +157,21 @@ mundo_letalidade <- percent(mundo_obitos/mundo_confirmados, accuracy = 0.01)
 ll_pais <- read_csv2("data/lnglat_paises.csv") %>% select(latitude, longitude, name)
 
 data_paises <- 
-  coronavirus %>% group_by(Country.Region) %>% filter(type=="confirmed") %>% summarise(confirmados = sum(cases)) %>%
+  coronavirus %>% group_by(country) %>% filter(type=="confirmed") %>% summarise(confirmados = sum(cases)) %>%
   left_join(
-    coronavirus %>% group_by(Country.Region) %>% filter(type=="recovered") %>% summarise(recuperados = sum(cases))
+    coronavirus %>% group_by(country) %>% filter(type=="recovered") %>% summarise(recuperados = sum(cases))
   ) %>% 
   left_join(
-    coronavirus %>% group_by(Country.Region) %>% filter(type=="death") %>% summarise(obitos = sum(cases))
+    coronavirus %>% group_by(country) %>% filter(type=="death") %>% summarise(obitos = sum(cases))
   ) %>% 
   mutate(letalidade = percent(obitos/confirmados, accuracy = 0.01),
-         Country.Region = ifelse(Country.Region=="US", "United States", Country.Region)) %>% 
-  left_join(ll_pais, by = c("Country.Region"="name")) %>% 
-  arrange(Country.Region)
+         country = ifelse(country=="US", "United States", country)) %>% 
+  left_join(ll_pais, by = c("country"="name")) %>% 
+  arrange(country)
+
+# Abas --------------------------------------------------------------------
+
+source("pages/brasil.R", encoding = "UTF-8")
+source("pages/rj_sp.R", encoding = "UTF-8")
+source("pages/mundo.R", encoding = "UTF-8")
+source("pages/overview.R", encoding = "UTF-8")
