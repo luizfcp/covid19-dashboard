@@ -147,7 +147,7 @@ server = function(session ,input, output) {
                     ggplot(aes(x = data, y = casos, color = tipo)) +
                     geom_point() +
                     geom_line() +
-                    scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                    scale_x_date(date_breaks = "7 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
                     scale_y_continuous(breaks = seq(0, max(data_brasil_novos_mod$casos), 5000), expand = c(0, 1000)) +
                     scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                     labs(x = "", y = "") + #title = "Total de casos por dia",
@@ -172,7 +172,7 @@ server = function(session ,input, output) {
                     filter(tipo == "Óbitos") %>% 
                     ggplot(aes(x = data, y = casos, fill = tipo)) +
                     geom_bar(stat = "identity", position = "stack") +
-                    scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                    scale_x_date(date_breaks = "7 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
                     scale_y_continuous(breaks = seq(0, max(data_brasil_novos_mod$casos), 100), expand = c(0, 50)) +
                     scale_fill_manual(values = c(obito_cor)) +
                     labs(x = "", y = "", title = "Casos novos por dia: Óbitos") +
@@ -191,7 +191,7 @@ server = function(session ,input, output) {
                     filter(tipo == "Confirmados") %>% 
                     ggplot(aes(x = data, y = casos, fill = tipo)) +
                     geom_bar(stat = "identity", position = "stack") +
-                    scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                    scale_x_date(date_breaks = "7 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
                     scale_y_continuous(breaks = seq(0, max(data_brasil_novos_mod$casos), 5000), expand = c(0, 1000)) +
                     scale_fill_manual(values = c(confirmado_cor)) +
                     labs(x = "", y = "", title = "Casos novos por dia: Confimados") +
@@ -251,8 +251,8 @@ server = function(session ,input, output) {
                 # geom_area() +
                 geom_point() +
                 geom_line() +
-                scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 100000), expand = c(0, 12000)) +
+                scale_x_date(date_breaks = "7 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                scale_y_continuous(breaks = seq(0, max(data_brasil_estados_mod_acumulado$casos), 200000), expand = c(0, 12000)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia",
                 theme_minimal() +
@@ -421,7 +421,7 @@ server = function(session ,input, output) {
                 addAwesomeMarkers(data = data_paises,
                                   lng = ~ data_paises$longitude,
                                   lat = ~ data_paises$latitude,
-                                  popup = paste("<b> País:</b>", data_paises$Country.Region %>% formatC(big.mark = "."),
+                                  popup = paste("<b> País:</b>", data_paises$country,
                                                 "<br> <b> Casos confirmados:</b>", data_paises$confirmados %>% formatC(big.mark = "."),
                                                 "<br> <b> Recuperados:</b>", data_paises$recuperados %>% formatC(big.mark = "."),
                                                 "<br> <b> Óbitos:</b>", data_paises$obitos %>% formatC(big.mark = "."),
@@ -446,8 +446,8 @@ server = function(session ,input, output) {
                 # geom_area() +
                 geom_point() +
                 geom_line() +
-                scale_x_date(date_breaks = "3 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                scale_y_continuous(breaks = seq(0, max(data_mundo_graph_total_mundo$cases), 10000), expand = c(0, 5000)) +
+                scale_x_date(date_breaks = "7 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                scale_y_continuous(breaks = seq(0, max(data_mundo_graph_total_mundo$cases), 20000), expand = c(0, 5000)) +
                 scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
                 labs(x = "", y = "") + #title = "Total de casos por dia", 
                 theme_minimal() +
