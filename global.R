@@ -23,6 +23,7 @@ library(tidyr)
 library(lubridate)
 library(stringr)
 library(readr)
+library(zoo)
 
 options(scipen = 99999999)
 
@@ -88,6 +89,18 @@ data_brasil_novos_mod <-
   gather(tipo, casos, -data) %>%
   ungroup() %>%
   mutate(tipo = ifelse(tipo=="casosNovos", "Confirmados", "Óbitos"))
+
+# Dados - Brasil - Casos novos - Media Moveis 7 dias
+data_brasil_novos_mod_mm <-
+  data %>%
+  select(1, data, casosNovos, obitosNovos) %>%
+  `colnames<-`(c("regiao", "data", "casosNovos", "obitosNovos")) %>% 
+  filter(regiao == "Brasil") %>% 
+  mutate(media_movel_confirmados = rollmean(casosNovos, 7, na.pad = TRUE, align = "right")) %>% 
+  select(-regiao) %>% 
+  `colnames<-`(c("data", "Confirmados", "Óbitos", "Médias Móveis 7d - Confirmados")) %>% 
+  gather(tipo, casos, -data) %>%
+  ungroup()
 
 # Dados - RJ
 data_rj <- data %>% 

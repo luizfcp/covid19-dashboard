@@ -143,21 +143,21 @@ server = function(session ,input, output) {
         renderPlotly({
             
             graph_total_br <-
-                    data_brasil_novos_mod %>%
-                    ggplot(aes(x = data, y = casos, color = tipo)) +
-                    geom_point() +
-                    geom_line() +
-                    scale_x_date(date_breaks = "7 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
-                    scale_y_continuous(breaks = seq(0, max(data_brasil_novos_mod$casos), 5000), expand = c(0, 1000)) +
-                    scale_color_manual(values = c(confirmado_cor, obito_cor, recuperado_cor)) +
-                    labs(x = "", y = "") + #title = "Total de casos por dia",
-                    theme_minimal() +
-                    theme(axis.text.x = element_text(angle = 45, hjust = 1),
-                          # legend.position = "none",
-                          legend.text = element_text(face="bold", size = 10),
-                          legend.title = element_blank(),
-                          plot.title = element_text(size=15, face="bold", hjust = 0.5))
-                ggplotly(graph_total_br) %>% layout(legend = list(x = 0.3, y = -0.11, orientation = 'h'))
+                data_brasil_novos_mod_mm %>%
+                ggplot(aes(x = data, y = casos, color = tipo)) +
+                geom_point() +
+                geom_line() +
+                scale_x_date(date_breaks = "7 day", date_labels =  "%d/%m", expand = c(0, 0.5)) +
+                scale_y_continuous(breaks = seq(0, max(data_brasil_novos_mod_mm$casos, na.rm = T), 5000), expand = c(0, 1000)) +
+                scale_color_manual(values = c(confirmado_cor, "#dba456", obito_cor)) +
+                labs(x = "", y = "") + #title = "Total de casos por dia",
+                theme_minimal() +
+                theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                      # legend.position = "none",
+                      legend.text = element_text(face="bold", size = 10),
+                      legend.title = element_blank(),
+                      plot.title = element_text(size=15, face="bold", hjust = 0.5))
+            ggplotly(graph_total_br) %>% layout(legend = list(x = 0.2, y = -0.11, orientation = 'h'))
             
         })
     
